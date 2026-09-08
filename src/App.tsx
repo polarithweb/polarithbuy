@@ -3,12 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { HubButton } from './components/HubButton';
 import { Footer } from './components/Footer';
 import { BooksHubView } from './components/BooksHubView';
-import { BooksAdminPortal } from './components/BooksAdminPortal';
 import { PcBuildsHubView } from './components/PcBuildsHubView';
-import { PcBuildsAdminPortal } from './components/PcBuildsAdminPortal';
 import { AccessoriesHubView } from './components/AccessoriesHubView';
-import { AccessoriesAdminPortal } from './components/AccessoriesAdminPortal';
-import { OrdersAdminView } from './components/OrdersAdminView';
+import { UnifiedAdminPortal } from './components/UnifiedAdminPortal';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
 import { CartButton } from './components/CartButton';
@@ -17,7 +14,7 @@ import { subscribeBooks } from './services/booksService';
 import { subscribePcBuilds } from './services/pcBuildsService';
 import { subscribeAccessories } from './services/accessoriesService';
 import { parseNumericPrice, formatRupeePrice } from './utils/price';
-import { SlidersHorizontal } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import type { HubItem, CartItem } from './types';
 import type { Book } from './data/booksData';
 import type { PcBuild } from './data/pcBuildsData';
@@ -28,13 +25,8 @@ export default function App() {
   
   // Real-time Firestore State for each department
   const [books, setBooks] = useState<Book[]>([]);
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
-
   const [pcBuilds, setPcBuilds] = useState<PcBuild[]>([]);
-  const [editingPcBuild, setEditingPcBuild] = useState<PcBuild | null>(null);
-
   const [accessories, setAccessories] = useState<Accessory[]>([]);
-  const [editingAccessory, setEditingAccessory] = useState<Accessory | null>(null);
 
   // Cart & Checkout State
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -184,28 +176,6 @@ export default function App() {
     setActiveView('hub');
   };
 
-  // Books Portal Handlers
-  const handleOpenBooksAdmin = (book?: Book) => {
-    setEditingBook(book || null);
-    setActiveView('books-admin');
-  };
-
-  // PC Builds Portal Handlers
-  const handleOpenPcAdmin = (build?: PcBuild) => {
-    setEditingPcBuild(build || null);
-    setActiveView('pc-admin');
-  };
-
-  // Accessories Portal Handlers
-  const handleOpenAccessoriesAdmin = (accessory?: Accessory) => {
-    setEditingAccessory(accessory || null);
-    setActiveView('accessories-admin');
-  };
-
-  const handleSwitchAdminPortal = (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => {
-    setActiveView(portal);
-  };
-
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const isPublicView = activeView === 'hub' || activeView.startsWith('btn-');
 
@@ -235,18 +205,6 @@ export default function App() {
                 <p className="mt-3 text-base sm:text-lg text-slate-500 max-w-md mx-auto">
                   Select a service to get started
                 </p>
-
-                {/* Admin and Orders portal shortcut */}
-                <div className="flex items-center justify-center gap-3 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => setActiveView('orders-admin')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer border border-slate-200 shadow-2xs"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Admin & Orders Portal</span>
-                  </button>
-                </div>
               </motion.div>
             </header>
 
@@ -265,6 +223,19 @@ export default function App() {
                   </motion.div>
                 ))}
               </div>
+
+              {/* Single small admin portal button at the bottom of the main page */}
+              <div className="mt-14 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setActiveView('unified-admin')}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-slate-200/80 transition-all cursor-pointer shadow-2xs"
+                  title="Unified Admin Portal"
+                >
+                  <Lock className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Admin Portal</span>
+                </button>
+              </div>
             </main>
           </motion.div>
         )}
@@ -275,25 +246,9 @@ export default function App() {
             <BooksHubView
               books={books}
               onBack={handleBackToHub}
-              onOpenAdmin={handleOpenBooksAdmin}
               onAddToCart={handleAddBookToCart}
               onOpenCart={() => setIsCartOpen(true)}
               cartCount={totalCartCount}
-            />
-          </div>
-        )}
-
-        {/* Books Hub Admin Portal */}
-        {activeView === 'books-admin' && (
-          <div key="books-admin" className="flex-1 flex flex-col">
-            <BooksAdminPortal
-              books={books}
-              initialEditBook={editingBook}
-              onBack={() => {
-                setEditingBook(null);
-                setActiveView('btn-books-hub');
-              }}
-              onSwitchPortal={handleSwitchAdminPortal}
             />
           </div>
         )}
@@ -304,25 +259,9 @@ export default function App() {
             <PcBuildsHubView
               builds={pcBuilds}
               onBack={handleBackToHub}
-              onOpenAdmin={handleOpenPcAdmin}
               onAddToCart={handleAddPcBuildToCart}
               onOpenCart={() => setIsCartOpen(true)}
               cartCount={totalCartCount}
-            />
-          </div>
-        )}
-
-        {/* PC Builds Admin Portal */}
-        {activeView === 'pc-admin' && (
-          <div key="pc-admin" className="flex-1 flex flex-col">
-            <PcBuildsAdminPortal
-              builds={pcBuilds}
-              initialEditBuild={editingPcBuild}
-              onBack={() => {
-                setEditingPcBuild(null);
-                setActiveView('btn-pc-builds');
-              }}
-              onSwitchPortal={handleSwitchAdminPortal}
             />
           </div>
         )}
@@ -333,7 +272,6 @@ export default function App() {
             <AccessoriesHubView
               accessories={accessories}
               onBack={handleBackToHub}
-              onOpenAdmin={handleOpenAccessoriesAdmin}
               onAddToCart={handleAddAccessoryToCart}
               onOpenCart={() => setIsCartOpen(true)}
               cartCount={totalCartCount}
@@ -341,27 +279,20 @@ export default function App() {
           </div>
         )}
 
-        {/* Tech Accessories Admin Portal */}
-        {activeView === 'accessories-admin' && (
-          <div key="accessories-admin" className="flex-1 flex flex-col">
-            <AccessoriesAdminPortal
-              accessories={accessories}
-              initialEditAccessory={editingAccessory}
-              onBack={() => {
-                setEditingAccessory(null);
-                setActiveView('btn-tech-wholesale');
-              }}
-              onSwitchPortal={handleSwitchAdminPortal}
-            />
-          </div>
-        )}
-
-        {/* Unified Customer Orders Admin Portal */}
-        {activeView === 'orders-admin' && (
-          <div key="orders-admin" className="flex-1 flex flex-col">
-            <OrdersAdminView
+        {/* Unified Admin Portal (Books, PC Builds, Accessories, Orders) */}
+        {(activeView === 'unified-admin' || activeView.includes('admin')) && (
+          <div key="unified-admin" className="flex-1 flex flex-col">
+            <UnifiedAdminPortal
               onBack={handleBackToHub}
-              onSwitchPortal={handleSwitchAdminPortal}
+              books={books}
+              builds={pcBuilds}
+              accessories={accessories}
+              initialTab={
+                activeView === 'books-admin' ? 'books' :
+                activeView === 'pc-admin' ? 'pc-builds' :
+                activeView === 'accessories-admin' ? 'accessories' :
+                'orders'
+              }
             />
           </div>
         )}

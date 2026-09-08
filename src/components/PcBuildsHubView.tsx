@@ -10,7 +10,8 @@ import {
   X,
   Sparkles,
   CreditCard,
-  ShoppingBag
+  ShoppingBag,
+  Package
 } from 'lucide-react';
 import { PC_BUILD_CATEGORIES } from '../data/pcBuildsData';
 import type { PcBuild } from '../data/pcBuildsData';
@@ -19,7 +20,6 @@ import { formatRupeePrice } from '../utils/price';
 interface PcBuildsHubViewProps {
   builds: PcBuild[];
   onBack: () => void;
-  onOpenAdmin: (editBuild?: PcBuild) => void;
   onAddToCart?: (build: PcBuild) => void;
   onOpenCart?: () => void;
   cartCount?: number;
@@ -28,7 +28,6 @@ interface PcBuildsHubViewProps {
 export function PcBuildsHubView({ 
   builds, 
   onBack, 
-  onOpenAdmin,
   onAddToCart,
   onOpenCart,
   cartCount = 0
@@ -94,15 +93,6 @@ export function PcBuildsHubView({
               )}
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => onOpenAdmin()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#EAF4FF] hover:bg-[#DDECFC] text-sky-800 border border-[#BFDBFE] hover:border-[#93C5FD] transition-all cursor-pointer shadow-2xs"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600" />
-            <span>Admin Portal</span>
-          </button>
         </div>
       </div>
 
@@ -260,18 +250,26 @@ export function PcBuildsHubView({
           <div className="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No PC Builds in Database</h3>
+          <h3 className="text-lg font-bold text-slate-800">
+            {builds.length === 0 ? 'No PC Builds in Catalog' : 'No Matching PC Builds Found'}
+          </h3>
           <p className="text-xs text-slate-500 mt-1.5 mb-6 leading-relaxed">
-            All hardcoded demo configurations have been removed. Open the Admin Portal to upload custom builds in Budget, Gaming, or Editing and Efficiency categories.
+            {builds.length === 0 
+              ? 'There are currently no custom PC builds available. Please check back soon.'
+              : 'Try changing your category filter or search term to see more configurations.'}
           </p>
-          <button
-            type="button"
-            onClick={() => onOpenAdmin()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-            <span>Open Admin Portal to Add PC Builds</span>
-          </button>
+          {builds.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory('All');
+                setSearchQuery('');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-sky-600 text-white hover:bg-sky-500 transition-colors shadow-xs cursor-pointer"
+            >
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
       )}
 

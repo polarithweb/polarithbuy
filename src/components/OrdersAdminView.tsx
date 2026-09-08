@@ -40,9 +40,10 @@ import {
 interface OrdersAdminViewProps {
   onBack?: () => void;
   onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => void;
+  hideHeader?: boolean;
 }
 
-export function OrdersAdminView({ onBack, onSwitchPortal }: OrdersAdminViewProps) {
+export function OrdersAdminView({ onBack, onSwitchPortal, hideHeader = false }: OrdersAdminViewProps) {
   // Password Protection
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => isUserAdminAuthenticated());
   const [passwordInput, setPasswordInput] = useState('');
@@ -231,73 +232,75 @@ export function OrdersAdminView({ onBack, onSwitchPortal }: OrdersAdminViewProps
       className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10"
     >
       {/* Top Header & Department Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-6">
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 transition-colors w-fit cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Hub</span>
-          </button>
-        )}
-
-        <div className="flex items-center gap-3">
-          {/* Department Switcher */}
-          {onSwitchPortal && (
-            <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-medium">
-              <button
-                type="button"
-                onClick={() => onSwitchPortal('books-admin')}
-                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
-              >
-                Books
-              </button>
-              <button
-                type="button"
-                onClick={() => onSwitchPortal('pc-admin')}
-                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
-              >
-                PC Builds
-              </button>
-              <button
-                type="button"
-                onClick={() => onSwitchPortal('accessories-admin')}
-                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
-              >
-                Accessories
-              </button>
-              <button
-                type="button"
-                className="px-2.5 py-1 rounded-lg bg-white text-sky-900 font-semibold shadow-2xs cursor-default flex items-center gap-1.5"
-              >
-                <span>Orders</span>
-                {newOrdersCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-sky-600 text-white text-[10px] font-bold flex items-center justify-center">
-                    {newOrdersCount}
-                  </span>
-                )}
-              </button>
-            </div>
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-6">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 transition-colors w-fit cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Hub</span>
+            </button>
           )}
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Firebase Connected</span>
-          </div>
+          <div className="flex items-center gap-3">
+            {/* Department Switcher */}
+            {onSwitchPortal && (
+              <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => onSwitchPortal('books-admin')}
+                  className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+                >
+                  Books
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSwitchPortal('pc-admin')}
+                  className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+                >
+                  PC Builds
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSwitchPortal('accessories-admin')}
+                  className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+                >
+                  Accessories
+                </button>
+                <button
+                  type="button"
+                  className="px-2.5 py-1 rounded-lg bg-white text-sky-900 font-semibold shadow-2xs cursor-default flex items-center gap-1.5"
+                >
+                  <span>Orders</span>
+                  {newOrdersCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-sky-600 text-white text-[10px] font-bold flex items-center justify-center">
+                      {newOrdersCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
 
-          <button
-            type="button"
-            onClick={handleLockPortal}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
-            title="Lock Admin Portal"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Lock</span>
-          </button>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+              <Database className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Firebase Connected</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLockPortal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+              title="Lock Admin Portal"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Lock</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="space-y-6">
       {/* Top Stats Overview */}

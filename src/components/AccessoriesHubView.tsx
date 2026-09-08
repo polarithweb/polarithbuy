@@ -21,7 +21,6 @@ import { formatRupeePrice } from '../utils/price';
 interface AccessoriesHubViewProps {
   accessories: Accessory[];
   onBack: () => void;
-  onOpenAdmin: (editAccessory?: Accessory) => void;
   onAddToCart?: (accessory: Accessory) => void;
   onOpenCart?: () => void;
   cartCount?: number;
@@ -30,7 +29,6 @@ interface AccessoriesHubViewProps {
 export function AccessoriesHubView({ 
   accessories, 
   onBack, 
-  onOpenAdmin,
   onAddToCart,
   onOpenCart,
   cartCount = 0
@@ -96,15 +94,6 @@ export function AccessoriesHubView({
               )}
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => onOpenAdmin()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#EAF4FF] hover:bg-[#DDECFC] text-sky-800 border border-[#BFDBFE] hover:border-[#93C5FD] transition-all cursor-pointer shadow-2xs"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600" />
-            <span>Admin Portal</span>
-          </button>
         </div>
       </div>
 
@@ -263,18 +252,26 @@ export function AccessoriesHubView({
           <div className="w-14 h-14 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No Accessories in Database</h3>
+          <h3 className="text-lg font-bold text-slate-800">
+            {accessories.length === 0 ? 'No Accessories in Catalog' : 'No Matching Accessories Found'}
+          </h3>
           <p className="text-xs text-slate-500 mt-1.5 mb-6 leading-relaxed">
-            All hardcoded demo items have been removed. Open the Admin Portal to upload products in Earbuds, Neckbands, Powerbanks, or Smartwatch categories.
+            {accessories.length === 0 
+              ? 'There are currently no accessories available in the catalog. Please check back soon.'
+              : 'Try changing your category filter or search term to see more products.'}
           </p>
-          <button
-            type="button"
-            onClick={() => onOpenAdmin()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-            <span>Open Admin Portal to Add Accessories</span>
-          </button>
+          {accessories.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory('All');
+                setSearchQuery('');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-sky-600 text-white hover:bg-sky-500 transition-colors shadow-xs cursor-pointer"
+            >
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
       )}
 

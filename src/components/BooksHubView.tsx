@@ -13,7 +13,8 @@ import {
   Banknote,
   CreditCard,
   Truck,
-  ShoppingBag
+  ShoppingBag,
+  Package
 } from 'lucide-react';
 import type { Book } from '../data/booksData';
 import { formatRupeePrice } from '../utils/price';
@@ -21,7 +22,6 @@ import { formatRupeePrice } from '../utils/price';
 interface BooksHubViewProps {
   books: Book[];
   onBack: () => void;
-  onOpenAdmin: (editBook?: Book) => void;
   onAddToCart?: (book: Book) => void;
   onOpenCart?: () => void;
   cartCount?: number;
@@ -30,7 +30,6 @@ interface BooksHubViewProps {
 export function BooksHubView({ 
   books, 
   onBack, 
-  onOpenAdmin,
   onAddToCart,
   onOpenCart,
   cartCount = 0
@@ -110,15 +109,6 @@ export function BooksHubView({
               )}
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => onOpenAdmin()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#EAF4FF] hover:bg-[#DDECFC] text-sky-800 border border-[#BFDBFE] hover:border-[#93C5FD] transition-all cursor-pointer shadow-2xs"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600" />
-            <span>Admin Portal</span>
-          </button>
         </div>
       </div>
 
@@ -302,23 +292,14 @@ export function BooksHubView({
             <Sparkles className="w-7 h-7" />
           </div>
           <h3 className="text-lg font-bold text-slate-800">
-            {books.length === 0 ? 'No Products in Database' : 'No Matching Books Found'}
+            {books.length === 0 ? 'No Products in Catalog' : 'No Matching Books Found'}
           </h3>
           <p className="text-xs text-slate-500 mt-1.5 mb-6 leading-relaxed">
             {books.length === 0 
-              ? 'All hardcoded demo products have been removed. Open the Admin Portal to upload your real books and products.'
+              ? 'There are currently no books available in the catalog. Please check back later.'
               : 'Try changing your payment mode filter (COD / Prepaid) or search term to see more results.'}
           </p>
-          {books.length === 0 ? (
-            <button
-              type="button"
-              onClick={() => onOpenAdmin()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-xs"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-sky-400" />
-              <span>Open Admin Portal to Add Products</span>
-            </button>
-          ) : (
+          {books.length > 0 && (
             <button
               type="button"
               onClick={() => {
