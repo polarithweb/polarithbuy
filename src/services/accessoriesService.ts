@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import type { Accessory } from '../data/accessoriesData';
+import { formatRupeePrice } from '../utils/price';
 
 const ACCESSORIES_COLLECTION = 'accessories';
 
@@ -80,7 +81,7 @@ export function subscribeAccessories(onUpdate: (accessories: Accessory[]) => voi
             title: data.title || 'Untitled Accessory',
             category: data.category || 'Earbuds',
             brand: data.brand || '',
-            price: data.price || '$29.99',
+            price: formatRupeePrice(data.price, 1499),
             rating: data.rating || 5.0,
             description: data.description || '',
             imageUrl: data.imageUrl || '',
@@ -140,7 +141,7 @@ export async function createAccessory(accessoryData: {
       title: accessoryData.title.trim(),
       category: accessoryData.category.trim(),
       brand: accessoryData.brand?.trim() || '',
-      price: accessoryData.price?.trim() || '$29.99',
+      price: formatRupeePrice(accessoryData.price, 1499),
       rating: 5.0,
       description: accessoryData.description?.trim() || '',
       imageUrl: accessoryData.imageUrl || '',
@@ -171,7 +172,7 @@ export async function updateAccessory(
       title: accessoryData.title.trim(),
       category: accessoryData.category.trim(),
       brand: accessoryData.brand?.trim() || '',
-      price: accessoryData.price?.trim() || '$29.99',
+      price: formatRupeePrice(accessoryData.price, 1499),
       description: accessoryData.description?.trim() || '',
       imageUrl: accessoryData.imageUrl || '',
     });

@@ -48,6 +48,24 @@
         "createdAt": { "type": "string" }
       },
       "required": ["title", "category", "price"]
+    },
+    "orders": {
+      "title": "Customer Order",
+      "description": "Customer order created via cart checkout",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 150 },
+        "phoneNumber": { "type": "string", "maxLength": 50 },
+        "address": { "type": "string", "maxLength": 500 },
+        "pinCode": { "type": "string", "maxLength": 20 },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "string" },
+        "paymentMode": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "Confirmed", "Shipped", "Delivered", "Cancelled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["customerName", "phoneNumber", "address", "pinCode", "items", "totalAmount"]
     }
   },
   "firestore": {
@@ -62,6 +80,10 @@
     "/accessories/{accessoryId}": {
       "schema": "accessories",
       "description": "Collection of tech accessories wholesale products"
+    },
+    "/orders/{orderId}": {
+      "schema": "orders",
+      "description": "Collection of customer checkout orders"
     }
   }
 }

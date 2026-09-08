@@ -13,6 +13,9 @@ service cloud.firestore {
     match /accessories/{accessoryId} {
       allow read, write: if true;
     }
+    match /orders/{orderId} {
+      allow read, write: if true;
+    }
   }
 }
 

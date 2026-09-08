@@ -25,6 +25,7 @@ import {
 import { BOOK_TYPES } from '../data/booksData';
 import { createBook, updateBook, removeBook } from '../services/booksService';
 import { compressImageFile } from '../utils/imageUpload';
+import { formatRupeePrice } from '../utils/price';
 import type { Book } from '../data/booksData';
 import { 
   isUserAdminAuthenticated, 
@@ -36,7 +37,7 @@ import {
 interface BooksAdminPortalProps {
   books: Book[];
   onBack: () => void;
-  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin') => void;
+  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => void;
   initialEditBook?: Book | null;
 }
 
@@ -170,9 +171,7 @@ export function BooksAdminPortal({
     setFeedback(null);
 
     try {
-      const formattedPrice = price.trim() 
-        ? (price.startsWith('$') ? price : `$${price}`) 
-        : '$19.99';
+      const formattedPrice = formatRupeePrice(price, 499);
 
       if (editingBookId) {
         // Edit existing product
@@ -386,9 +385,16 @@ export function BooksAdminPortal({
               <button
                 type="button"
                 onClick={() => onSwitchPortal('accessories-admin')}
-                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors"
+                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
               >
                 Accessories
+              </button>
+              <button
+                type="button"
+                onClick={() => onSwitchPortal('orders-admin')}
+                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+              >
+                Orders
               </button>
             </div>
           )}
@@ -616,7 +622,7 @@ export function BooksAdminPortal({
                   type="text"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  placeholder="$19.99"
+                  placeholder="₹499"
                   className="w-full px-3.5 py-2 text-sm rounded-xl bg-white border border-sky-200 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 text-slate-900 transition-all"
                 />
               </div>
@@ -723,7 +729,7 @@ export function BooksAdminPortal({
                           {book.type}
                         </span>
                         <span className="text-xs font-bold text-slate-900">
-                          {book.price || '$19.99'}
+                          {formatRupeePrice(book.price, 499)}
                         </span>
                         {book.cashOnDeliveryEligible === false ? (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">

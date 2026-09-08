@@ -8,11 +8,17 @@ import { PcBuildsHubView } from './components/PcBuildsHubView';
 import { PcBuildsAdminPortal } from './components/PcBuildsAdminPortal';
 import { AccessoriesHubView } from './components/AccessoriesHubView';
 import { AccessoriesAdminPortal } from './components/AccessoriesAdminPortal';
+import { OrdersAdminView } from './components/OrdersAdminView';
+import { CartDrawer } from './components/CartDrawer';
+import { CheckoutModal } from './components/CheckoutModal';
+import { CartButton } from './components/CartButton';
 import { HUB_ITEMS } from './data/hubItems';
 import { subscribeBooks } from './services/booksService';
 import { subscribePcBuilds } from './services/pcBuildsService';
 import { subscribeAccessories } from './services/accessoriesService';
-import type { HubItem } from './types';
+import { parseNumericPrice, formatRupeePrice } from './utils/price';
+import { SlidersHorizontal } from 'lucide-react';
+import type { HubItem, CartItem } from './types';
 import type { Book } from './data/booksData';
 import type { PcBuild } from './data/pcBuildsData';
 import type { Accessory } from './data/accessoriesData';
@@ -29,6 +35,27 @@ export default function App() {
 
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [editingAccessory, setEditingAccessory] = useState<Accessory | null>(null);
+
+  // Cart & Checkout State
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('polarith_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Synchronize cart with localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('polarith_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.error('Failed to sync cart with localStorage:', e);
+    }
+  }, [cart]);
 
   // Real-time synchronization with Firebase Firestore
   useEffect(() => {
@@ -50,6 +77,104 @@ export default function App() {
       unsubAccessories();
     };
   }, []);
+
+  // Cart Item Handlers
+  const addToCart = (newItem: CartItem) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.id === newItem.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.id === newItem.id ? { ...i, quantity: i.quantity + newItem.quantity } : i
+        );
+      }
+      return [...prev, newItem];
+    });
+    setIsCartOpen(true);
+  };
+
+  const handleAddBookToCart = (book: Book) => {
+    const rupeeStr = formatRupeePrice(book.price, 499);
+    const numPrice = parseNumericPrice(rupeeStr);
+    const cartItem: CartItem = {
+      id: `book-${book.id}`,
+      productId: book.id,
+      title: book.title,
+      department: 'books',
+      departmentName: 'Books',
+      price: rupeeStr,
+      numericPrice: numPrice || 499,
+      imageUrl: book.imageUrl,
+      quantity: 1,
+      cashOnDeliveryEligible: book.cashOnDeliveryEligible !== false,
+      details: book.author ? `Author: ${book.author}` : undefined
+    };
+    addToCart(cartItem);
+  };
+
+  const handleAddPcBuildToCart = (build: PcBuild) => {
+    const rupeeStr = formatRupeePrice(build.price, 49999);
+    const numPrice = parseNumericPrice(rupeeStr);
+    const cartItem: CartItem = {
+      id: `pc-${build.id}`,
+      productId: build.id,
+      title: build.title,
+      department: 'pc_builds',
+      departmentName: 'PC Builds',
+      price: rupeeStr,
+      numericPrice: numPrice || 49999,
+      imageUrl: build.imageUrl,
+      quantity: 1,
+      cashOnDeliveryEligible: false,
+      details: build.specs ? `Specs: ${build.specs.slice(0, 70)}...` : undefined
+    };
+    addToCart(cartItem);
+  };
+
+  const handleAddAccessoryToCart = (item: Accessory) => {
+    const rupeeStr = formatRupeePrice(item.price, 1499);
+    const numPrice = parseNumericPrice(rupeeStr);
+    const cartItem: CartItem = {
+      id: `acc-${item.id}`,
+      productId: item.id,
+      title: item.title,
+      department: 'accessories',
+      departmentName: 'Tech Accessories',
+      price: rupeeStr,
+      numericPrice: numPrice || 1499,
+      imageUrl: item.imageUrl,
+      quantity: 1,
+      cashOnDeliveryEligible: false,
+      details: item.brand ? `Brand: ${item.brand}` : undefined
+    };
+    addToCart(cartItem);
+  };
+
+  const handleUpdateCartQuantity = (itemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      handleRemoveCartItem(itemId);
+      return;
+    }
+    setCart((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
+    );
+  };
+
+  const handleRemoveCartItem = (itemId: string) => {
+    setCart((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  const handleProceedToCheckout = () => {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleOrderSuccess = () => {
+    setCart([]);
+  };
 
   const handleButtonClick = (item: HubItem) => {
     setActiveView(item.id);
@@ -77,9 +202,12 @@ export default function App() {
     setActiveView('accessories-admin');
   };
 
-  const handleSwitchAdminPortal = (portal: 'books-admin' | 'pc-admin' | 'accessories-admin') => {
+  const handleSwitchAdminPortal = (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => {
     setActiveView(portal);
   };
+
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const isPublicView = activeView === 'hub' || activeView.startsWith('btn-');
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between selection:bg-sky-200 selection:text-sky-900">
@@ -94,7 +222,7 @@ export default function App() {
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col justify-center max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16"
           >
-            {/* Header - Clean typography, no logo */}
+            {/* Header */}
             <header id="hub-header" className="text-center mb-10 sm:mb-14">
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
@@ -107,6 +235,18 @@ export default function App() {
                 <p className="mt-3 text-base sm:text-lg text-slate-500 max-w-md mx-auto">
                   Select a service to get started
                 </p>
+
+                {/* Admin and Orders portal shortcut */}
+                <div className="flex items-center justify-center gap-3 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setActiveView('orders-admin')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer border border-slate-200 shadow-2xs"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Admin & Orders Portal</span>
+                  </button>
+                </div>
               </motion.div>
             </header>
 
@@ -136,6 +276,9 @@ export default function App() {
               books={books}
               onBack={handleBackToHub}
               onOpenAdmin={handleOpenBooksAdmin}
+              onAddToCart={handleAddBookToCart}
+              onOpenCart={() => setIsCartOpen(true)}
+              cartCount={totalCartCount}
             />
           </div>
         )}
@@ -162,6 +305,9 @@ export default function App() {
               builds={pcBuilds}
               onBack={handleBackToHub}
               onOpenAdmin={handleOpenPcAdmin}
+              onAddToCart={handleAddPcBuildToCart}
+              onOpenCart={() => setIsCartOpen(true)}
+              cartCount={totalCartCount}
             />
           </div>
         )}
@@ -188,6 +334,9 @@ export default function App() {
               accessories={accessories}
               onBack={handleBackToHub}
               onOpenAdmin={handleOpenAccessoriesAdmin}
+              onAddToCart={handleAddAccessoryToCart}
+              onOpenCart={() => setIsCartOpen(true)}
+              cartCount={totalCartCount}
             />
           </div>
         )}
@@ -206,11 +355,47 @@ export default function App() {
             />
           </div>
         )}
+
+        {/* Unified Customer Orders Admin Portal */}
+        {activeView === 'orders-admin' && (
+          <div key="orders-admin" className="flex-1 flex flex-col">
+            <OrdersAdminView
+              onBack={handleBackToHub}
+              onSwitchPortal={handleSwitchAdminPortal}
+            />
+          </div>
+        )}
       </AnimatePresence>
+
+      {/* Floating Cart Button in public views */}
+      {isPublicView && (
+        <CartButton
+          items={cart}
+          onClick={() => setIsCartOpen(true)}
+        />
+      )}
+
+      {/* Cart Drawer */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        items={cart}
+        onClose={() => setIsCartOpen(false)}
+        onUpdateQuantity={handleUpdateCartQuantity}
+        onRemoveItem={handleRemoveCartItem}
+        onClearCart={handleClearCart}
+        onProceedToCheckout={handleProceedToCheckout}
+      />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        items={cart}
+        onClose={() => setIsCheckoutOpen(false)}
+        onOrderSuccess={handleOrderSuccess}
+      />
 
       {/* Footer */}
       <Footer />
     </div>
   );
 }
-

@@ -24,6 +24,7 @@ import {
 import { ACCESSORY_CATEGORIES } from '../data/accessoriesData';
 import { createAccessory, updateAccessory, removeAccessory } from '../services/accessoriesService';
 import { compressImageFile } from '../utils/imageUpload';
+import { formatRupeePrice } from '../utils/price';
 import type { Accessory } from '../data/accessoriesData';
 import { 
   isUserAdminAuthenticated, 
@@ -35,7 +36,7 @@ import {
 interface AccessoriesAdminPortalProps {
   accessories: Accessory[];
   onBack: () => void;
-  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin') => void;
+  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => void;
   initialEditAccessory?: Accessory | null;
 }
 
@@ -166,9 +167,7 @@ export function AccessoriesAdminPortal({
     setFeedback(null);
 
     try {
-      const formattedPrice = price.trim() 
-        ? (price.startsWith('$') ? price : `$${price}`) 
-        : '$29.99';
+      const formattedPrice = formatRupeePrice(price, 1499);
 
       if (editingAccessoryId) {
         // Edit existing accessory
@@ -383,6 +382,13 @@ export function AccessoriesAdminPortal({
                 className="px-2.5 py-1 rounded-lg bg-white text-sky-900 font-semibold shadow-2xs"
               >
                 Accessories
+              </button>
+              <button
+                type="button"
+                onClick={() => onSwitchPortal('orders-admin')}
+                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+              >
+                Orders
               </button>
             </div>
           )}
@@ -610,7 +616,7 @@ export function AccessoriesAdminPortal({
                 type="text"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="$29.99"
+                placeholder="₹1,499"
                 className="w-full px-3.5 py-2 text-sm rounded-xl bg-white border border-sky-200 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 text-slate-900 transition-all"
               />
             </div>
@@ -697,7 +703,7 @@ export function AccessoriesAdminPortal({
                           {item.category}
                         </span>
                         <span className="text-xs font-bold text-slate-900">
-                          {item.price || '$29.99'}
+                          {formatRupeePrice(item.price, 1499)}
                         </span>
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                           <CreditCard className="w-2.5 h-2.5 text-amber-600" />

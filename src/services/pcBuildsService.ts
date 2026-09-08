@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import type { PcBuild } from '../data/pcBuildsData';
+import { formatRupeePrice } from '../utils/price';
 
 const PC_BUILDS_COLLECTION = 'pc_builds';
 
@@ -80,7 +81,7 @@ export function subscribePcBuilds(onUpdate: (builds: PcBuild[]) => void): () => 
             title: data.title || 'Untitled PC Build',
             category: data.category || 'Gaming',
             specs: data.specs || '',
-            price: data.price || '$999.00',
+            price: formatRupeePrice(data.price, 49999),
             rating: data.rating || 5.0,
             description: data.description || '',
             imageUrl: data.imageUrl || '',
@@ -140,7 +141,7 @@ export async function createPcBuild(buildData: {
       title: buildData.title.trim(),
       category: buildData.category.trim(),
       specs: buildData.specs?.trim() || '',
-      price: buildData.price?.trim() || '$999.00',
+      price: formatRupeePrice(buildData.price, 49999),
       rating: 5.0,
       description: buildData.description?.trim() || '',
       imageUrl: buildData.imageUrl || '',
@@ -171,7 +172,7 @@ export async function updatePcBuild(
       title: buildData.title.trim(),
       category: buildData.category.trim(),
       specs: buildData.specs?.trim() || '',
-      price: buildData.price?.trim() || '$999.00',
+      price: formatRupeePrice(buildData.price, 49999),
       description: buildData.description?.trim() || '',
       imageUrl: buildData.imageUrl || '',
     });

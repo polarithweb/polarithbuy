@@ -24,6 +24,7 @@ import {
 import { PC_BUILD_CATEGORIES } from '../data/pcBuildsData';
 import { createPcBuild, updatePcBuild, removePcBuild } from '../services/pcBuildsService';
 import { compressImageFile } from '../utils/imageUpload';
+import { formatRupeePrice } from '../utils/price';
 import type { PcBuild } from '../data/pcBuildsData';
 import { 
   isUserAdminAuthenticated, 
@@ -35,7 +36,7 @@ import {
 interface PcBuildsAdminPortalProps {
   builds: PcBuild[];
   onBack: () => void;
-  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin') => void;
+  onSwitchPortal?: (portal: 'books-admin' | 'pc-admin' | 'accessories-admin' | 'orders-admin') => void;
   initialEditBuild?: PcBuild | null;
 }
 
@@ -166,9 +167,7 @@ export function PcBuildsAdminPortal({
     setFeedback(null);
 
     try {
-      const formattedPrice = price.trim() 
-        ? (price.startsWith('$') ? price : `$${price}`) 
-        : '$999.00';
+      const formattedPrice = formatRupeePrice(price, 49999);
 
       if (editingBuildId) {
         // Edit existing build
@@ -380,9 +379,16 @@ export function PcBuildsAdminPortal({
               <button
                 type="button"
                 onClick={() => onSwitchPortal('accessories-admin')}
-                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors"
+                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
               >
                 Accessories
+              </button>
+              <button
+                type="button"
+                onClick={() => onSwitchPortal('orders-admin')}
+                className="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors cursor-pointer"
+              >
+                Orders
               </button>
             </div>
           )}
@@ -610,7 +616,7 @@ export function PcBuildsAdminPortal({
                 type="text"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="$1,299.00"
+                placeholder="₹49,999"
                 className="w-full px-3.5 py-2 text-sm rounded-xl bg-white border border-sky-200 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 text-slate-900 transition-all"
               />
             </div>
@@ -697,7 +703,7 @@ export function PcBuildsAdminPortal({
                           {build.category}
                         </span>
                         <span className="text-xs font-bold text-slate-900">
-                          {build.price || '$999.00'}
+                          {formatRupeePrice(build.price, 49999)}
                         </span>
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
                           <CreditCard className="w-2.5 h-2.5 text-sky-600" />

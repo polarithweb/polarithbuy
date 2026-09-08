@@ -7,23 +7,34 @@ import {
   Bookmark, 
   Check, 
   SlidersHorizontal,
-  Pencil,
   X,
   Sparkles,
   CreditCard,
   AlertCircle,
-  Info
+  Info,
+  ShoppingBag
 } from 'lucide-react';
 import { ACCESSORY_CATEGORIES } from '../data/accessoriesData';
 import type { Accessory } from '../data/accessoriesData';
+import { formatRupeePrice } from '../utils/price';
 
 interface AccessoriesHubViewProps {
   accessories: Accessory[];
   onBack: () => void;
   onOpenAdmin: (editAccessory?: Accessory) => void;
+  onAddToCart?: (accessory: Accessory) => void;
+  onOpenCart?: () => void;
+  cartCount?: number;
 }
 
-export function AccessoriesHubView({ accessories, onBack, onOpenAdmin }: AccessoriesHubViewProps) {
+export function AccessoriesHubView({ 
+  accessories, 
+  onBack, 
+  onOpenAdmin,
+  onAddToCart,
+  onOpenCart,
+  cartCount = 0
+}: AccessoriesHubViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [savedItems, setSavedItems] = useState<string[]>([]);
@@ -68,11 +79,23 @@ export function AccessoriesHubView({ accessories, onBack, onOpenAdmin }: Accesso
           <span>Back to Hub</span>
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sky-700">
-            <Package className="w-5 h-5 text-sky-600" />
-            <span className="font-semibold text-sm tracking-wide">Polarith Tech Accessories</span>
-          </div>
+        <div className="flex items-center gap-2.5">
+          {onOpenCart && (
+            <button
+              type="button"
+              onClick={onOpenCart}
+              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              aria-label="Open Cart"
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[10px] flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             type="button"
@@ -155,7 +178,7 @@ export function AccessoriesHubView({ accessories, onBack, onOpenAdmin }: Accesso
                       {item.category}
                     </span>
                     <span className="text-sm font-extrabold text-slate-900">
-                      {item.price || '$29.99'}
+                      {formatRupeePrice(item.price, 1499)}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
                       <CreditCard className="w-3 h-3 text-amber-600" />
@@ -191,12 +214,12 @@ export function AccessoriesHubView({ accessories, onBack, onOpenAdmin }: Accesso
 
                   <button
                     type="button"
-                    onClick={() => onOpenAdmin(item)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer bg-white hover:bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs"
-                    title="Edit this accessory in Admin Portal"
+                    onClick={() => onAddToCart && onAddToCart(item)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 shadow-2xs"
+                    title="Add to shopping cart"
                   >
-                    <Pencil className="w-3 h-3 text-sky-600" />
-                    <span>Edit</span>
+                    <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Add to Cart</span>
                   </button>
 
                   <button
@@ -308,18 +331,19 @@ export function AccessoriesHubView({ accessories, onBack, onOpenAdmin }: Accesso
 
                   <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xl font-extrabold text-slate-900">
-                      {activeModalItem.price || '$29.99'}
+                      {formatRupeePrice(activeModalItem.price, 1499)}
                     </span>
                     <button
                       type="button"
                       onClick={() => {
+                        if (onAddToCart) onAddToCart(activeModalItem);
                         setActiveModalItem(null);
-                        onOpenAdmin(activeModalItem);
+                        if (onOpenCart) onOpenCart();
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors cursor-pointer shadow-xs"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Edit Accessory</span>
+                      <ShoppingBag className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Add to Cart</span>
                     </button>
                   </div>
                 </div>

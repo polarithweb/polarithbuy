@@ -7,21 +7,32 @@ import {
   Bookmark, 
   Check, 
   SlidersHorizontal,
-  Pencil,
   X,
   Sparkles,
-  CreditCard
+  CreditCard,
+  ShoppingBag
 } from 'lucide-react';
 import { PC_BUILD_CATEGORIES } from '../data/pcBuildsData';
 import type { PcBuild } from '../data/pcBuildsData';
+import { formatRupeePrice } from '../utils/price';
 
 interface PcBuildsHubViewProps {
   builds: PcBuild[];
   onBack: () => void;
   onOpenAdmin: (editBuild?: PcBuild) => void;
+  onAddToCart?: (build: PcBuild) => void;
+  onOpenCart?: () => void;
+  cartCount?: number;
 }
 
-export function PcBuildsHubView({ builds, onBack, onOpenAdmin }: PcBuildsHubViewProps) {
+export function PcBuildsHubView({ 
+  builds, 
+  onBack, 
+  onOpenAdmin,
+  onAddToCart,
+  onOpenCart,
+  cartCount = 0
+}: PcBuildsHubViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [savedBuilds, setSavedBuilds] = useState<string[]>([]);
@@ -66,11 +77,23 @@ export function PcBuildsHubView({ builds, onBack, onOpenAdmin }: PcBuildsHubView
           <span>Back to Hub</span>
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sky-700">
-            <Cpu className="w-5 h-5 text-sky-600" />
-            <span className="font-semibold text-sm tracking-wide">Polarith PC Builds</span>
-          </div>
+        <div className="flex items-center gap-2.5">
+          {onOpenCart && (
+            <button
+              type="button"
+              onClick={onOpenCart}
+              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              aria-label="Open Cart"
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[10px] flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             type="button"
@@ -152,7 +175,7 @@ export function PcBuildsHubView({ builds, onBack, onOpenAdmin }: PcBuildsHubView
                       {build.category}
                     </span>
                     <span className="text-sm font-extrabold text-slate-900">
-                      {build.price || '$999.00'}
+                      {formatRupeePrice(build.price, 49999)}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
                       <CreditCard className="w-3 h-3 text-amber-600" />
@@ -188,12 +211,12 @@ export function PcBuildsHubView({ builds, onBack, onOpenAdmin }: PcBuildsHubView
 
                   <button
                     type="button"
-                    onClick={() => onOpenAdmin(build)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer bg-white hover:bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs"
-                    title="Edit this build in Admin Portal"
+                    onClick={() => onAddToCart && onAddToCart(build)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 shadow-2xs"
+                    title="Add to shopping cart"
                   >
-                    <Pencil className="w-3 h-3 text-sky-600" />
-                    <span>Edit</span>
+                    <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Add to Cart</span>
                   </button>
 
                   <button
@@ -305,18 +328,19 @@ export function PcBuildsHubView({ builds, onBack, onOpenAdmin }: PcBuildsHubView
 
                   <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xl font-extrabold text-slate-900">
-                      {activeModalBuild.price || '$999.00'}
+                      {formatRupeePrice(activeModalBuild.price, 49999)}
                     </span>
                     <button
                       type="button"
                       onClick={() => {
+                        if (onAddToCart) onAddToCart(activeModalBuild);
                         setActiveModalBuild(null);
-                        onOpenAdmin(activeModalBuild);
+                        if (onOpenCart) onOpenCart();
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors cursor-pointer shadow-xs"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Edit Build</span>
+                      <ShoppingBag className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Add to Cart</span>
                     </button>
                   </div>
                 </div>

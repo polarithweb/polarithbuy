@@ -8,22 +8,33 @@ import {
   Check, 
   Library,
   SlidersHorizontal,
-  Pencil,
   X,
   Sparkles,
   Banknote,
   CreditCard,
-  Truck
+  Truck,
+  ShoppingBag
 } from 'lucide-react';
 import type { Book } from '../data/booksData';
+import { formatRupeePrice } from '../utils/price';
 
 interface BooksHubViewProps {
   books: Book[];
   onBack: () => void;
   onOpenAdmin: (editBook?: Book) => void;
+  onAddToCart?: (book: Book) => void;
+  onOpenCart?: () => void;
+  cartCount?: number;
 }
 
-export function BooksHubView({ books, onBack, onOpenAdmin }: BooksHubViewProps) {
+export function BooksHubView({ 
+  books, 
+  onBack, 
+  onOpenAdmin,
+  onAddToCart,
+  onOpenCart,
+  cartCount = 0
+}: BooksHubViewProps) {
   const [selectedType, setSelectedType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [codFilter, setCodFilter] = useState<'all' | 'cod' | 'prepaid'>('all');
@@ -82,11 +93,23 @@ export function BooksHubView({ books, onBack, onOpenAdmin }: BooksHubViewProps) 
           <span>Back to Hub</span>
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sky-700">
-            <Library className="w-5 h-5 text-sky-600" />
-            <span className="font-semibold text-sm tracking-wide">Polarith Books Hub</span>
-          </div>
+        <div className="flex items-center gap-2.5">
+          {onOpenCart && (
+            <button
+              type="button"
+              onClick={onOpenCart}
+              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 transition-all cursor-pointer shadow-2xs"
+              aria-label="Open Cart"
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-sky-600 text-white font-bold text-[10px] flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             type="button"
@@ -187,7 +210,7 @@ export function BooksHubView({ books, onBack, onOpenAdmin }: BooksHubViewProps) 
                       {book.type}
                     </span>
                     <span className="text-sm font-extrabold text-slate-900">
-                      {book.price || '$19.99'}
+                      {formatRupeePrice(book.price, 499)}
                     </span>
                     {/* Cash on Delivery status badge */}
                     {isCodEligible ? (
@@ -229,12 +252,12 @@ export function BooksHubView({ books, onBack, onOpenAdmin }: BooksHubViewProps) 
 
                   <button
                     type="button"
-                    onClick={() => onOpenAdmin(book)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer bg-white hover:bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs"
-                    title="Edit this product in Admin Portal"
+                    onClick={() => onAddToCart && onAddToCart(book)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 shadow-2xs"
+                    title="Add to shopping cart"
                   >
-                    <Pencil className="w-3 h-3 text-sky-600" />
-                    <span>Edit</span>
+                    <ShoppingBag className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Add to Cart</span>
                   </button>
 
                   <button
@@ -378,18 +401,19 @@ export function BooksHubView({ books, onBack, onOpenAdmin }: BooksHubViewProps) 
 
                   <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xl font-extrabold text-slate-900">
-                      {activeModalBook.price || '$19.99'}
+                      {formatRupeePrice(activeModalBook.price, 499)}
                     </span>
                     <button
                       type="button"
                       onClick={() => {
+                        if (onAddToCart) onAddToCart(activeModalBook);
                         setActiveModalBook(null);
-                        onOpenAdmin(activeModalBook);
+                        if (onOpenCart) onOpenCart();
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors cursor-pointer shadow-xs"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Edit Product</span>
+                      <ShoppingBag className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Add to Cart</span>
                     </button>
                   </div>
                 </div>

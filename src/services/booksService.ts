@@ -9,6 +9,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import type { Book } from '../data/booksData';
+import { formatRupeePrice } from '../utils/price';
 
 const BOOKS_COLLECTION = 'books';
 
@@ -80,7 +81,7 @@ export function subscribeBooks(onUpdate: (books: Book[]) => void): () => void {
             title: data.title || 'Untitled Product',
             type: data.type || data.category || 'General',
             author: data.author || 'Polarith Editorial',
-            price: data.price || '$19.99',
+            price: formatRupeePrice(data.price, 499),
             rating: data.rating || 5.0,
             description: data.description || '',
             imageUrl: data.imageUrl || '',
@@ -142,7 +143,7 @@ export async function createBook(bookData: {
       title: bookData.title.trim(),
       type: bookData.type.trim(),
       author: bookData.author?.trim() || 'Polarith Editorial',
-      price: bookData.price?.trim() || '$19.99',
+      price: formatRupeePrice(bookData.price, 499),
       rating: 5.0,
       description: bookData.description?.trim() || '',
       imageUrl: bookData.imageUrl || '',
@@ -175,7 +176,7 @@ export async function updateBook(
       title: bookData.title.trim(),
       type: bookData.type.trim(),
       author: bookData.author?.trim() || 'Polarith Editorial',
-      price: bookData.price?.trim() || '$19.99',
+      price: formatRupeePrice(bookData.price, 499),
       description: bookData.description?.trim() || '',
       imageUrl: bookData.imageUrl || '',
       cashOnDeliveryEligible: bookData.cashOnDeliveryEligible !== undefined ? bookData.cashOnDeliveryEligible : true,
