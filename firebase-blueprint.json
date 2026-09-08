@@ -1,0 +1,68 @@
+{
+  "entities": {
+    "books": {
+      "title": "Book Product",
+      "description": "Book catalog product entity stored in Firestore",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "type": { "type": "string", "maxLength": 100 },
+        "author": { "type": "string", "maxLength": 150 },
+        "price": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "imageUrl": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "cashOnDeliveryEligible": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "type", "price"]
+    },
+    "pc_builds": {
+      "title": "PC Build Product",
+      "description": "Custom PC build configurations and workstation units",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "enum": ["Budget", "Gaming", "Editing and Efficiency"] },
+        "specs": { "type": "string", "maxLength": 500 },
+        "price": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "imageUrl": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "category", "price"]
+    },
+    "accessories": {
+      "title": "Tech Accessory Product",
+      "description": "Wholesale technology accessories, peripherals and audio gear",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "enum": ["Earbuds", "Neckbands", "Powerbanks", "Smartwatch"] },
+        "brand": { "type": "string", "maxLength": 150 },
+        "price": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "imageUrl": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "category", "price"]
+    }
+  },
+  "firestore": {
+    "/books/{bookId}": {
+      "schema": "books",
+      "description": "Collection of books and literature products"
+    },
+    "/pc_builds/{buildId}": {
+      "schema": "pc_builds",
+      "description": "Collection of custom PC build configurations"
+    },
+    "/accessories/{accessoryId}": {
+      "schema": "accessories",
+      "description": "Collection of tech accessories wholesale products"
+    }
+  }
+}
+

@@ -1,0 +1,7 @@
+{
+  "name": "Polarith Business Hub",
+  "description": "Polarith Business Hub providing access to Tech Accessories Wholesale, PC Builds, and Books Hub.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
